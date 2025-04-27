@@ -117,6 +117,13 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(sched_update_nr_running_tp);
 
 DEFINE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
 
+
+
+DEFINE_PER_CPU(unsigned long, context_switch_counter);
+EXPORT_PER_CPU_SYMBOL_GPL(context_switch_counter);
+
+
+
 #ifdef CONFIG_SCHED_DEBUG
 /*
  * Debugging: various feature bits
@@ -5328,6 +5335,10 @@ static __always_inline struct rq *
 context_switch(struct rq *rq, struct task_struct *prev,
 	       struct task_struct *next, struct rq_flags *rf)
 {
+	this_cpu_inc(context_switch_counter);
+
+
+	
 	prepare_task_switch(rq, prev, next);
 
 	/*
