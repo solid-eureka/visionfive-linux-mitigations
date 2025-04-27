@@ -2,7 +2,8 @@
 
 ## Build
 
-via [rvspace.org](https://rvspace.org/en/project/VisionFive2_Debian_Wiki_202302_Release#updating-linux-kernel-in-image):
+via [rvspace.org](https://rvspace.org/en/project/VisionFive2_Debian_Wiki_202302_Release#updating-linux-kernel-in-image),
+see `./build.sh`:
 
 ```bash
 cp arch/riscv/configs/starfive_visionfive2_defconfig .config
