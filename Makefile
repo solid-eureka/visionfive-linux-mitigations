@@ -2,7 +2,7 @@
 VERSION = 6
 PATCHLEVEL = 6
 SUBLEVEL = 20
-EXTRAVERSION = -mitgtn-ctx_sw_cnt
+EXTRAVERSION = -mitgtn-ctx-sw-cnt
 NAME = Research kernel with RISC-V mitigations
 
 # *DOCUMENTATION*
