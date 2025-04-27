@@ -2,8 +2,8 @@
 VERSION = 6
 PATCHLEVEL = 6
 SUBLEVEL = 20
-EXTRAVERSION =
-NAME = Hurr durr I'ma ninja sloth
+EXTRAVERSION = -mitgtn
+NAME = Research kernel with RISC-V mitigations
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
