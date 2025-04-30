@@ -5338,7 +5338,7 @@ context_switch(struct rq *rq, struct task_struct *prev,
 	this_cpu_inc(context_switch_counter);
 
 
-	
+
 	prepare_task_switch(rq, prev, next);
 
 	/*
@@ -5394,6 +5394,13 @@ context_switch(struct rq *rq, struct task_struct *prev,
 	/* Here we just switch the register state and the stack. */
 	switch_to(prev, next, prev);
 	barrier();
+
+
+	// RISC-V mitigation: clear I-Cache after context switch
+	if (next->mm) { // if switching to a user thread
+		asm volatile ("fence.i");
+	}
+
 
 	return finish_task_switch(prev);
 }
