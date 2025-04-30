@@ -122,6 +122,9 @@ DEFINE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
 DEFINE_PER_CPU(unsigned long, context_switch_counter);
 EXPORT_PER_CPU_SYMBOL_GPL(context_switch_counter);
 
+unsigned long enable_mitigation_clear_icache_on_context_switch = 0;
+EXPORT_SYMBOL_GPL(enable_mitigation_clear_icache_on_context_switch);
+
 
 
 #ifdef CONFIG_SCHED_DEBUG
@@ -5397,8 +5400,10 @@ context_switch(struct rq *rq, struct task_struct *prev,
 
 
 	// RISC-V mitigation: clear I-Cache after context switch
-	if (next->mm) { // if switching to a user thread
-		asm volatile ("fence.i");
+	if (enable_mitigation_clear_icache_on_context_switch) {
+		if (next->mm) { // if switching to a user thread
+			asm volatile ("fence.i");
+		}
 	}
 
 
