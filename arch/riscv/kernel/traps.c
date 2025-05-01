@@ -151,6 +151,91 @@ DO_ERROR_INFO(do_trap_insn_misaligned,
 DO_ERROR_INFO(do_trap_insn_fault,
 	SIGSEGV, SEGV_ACCERR, "instruction access fault");
 
+// Helper to emulate CSR reads like rdcycle, rdtime, rdinstret
+static bool emulate_csr_read(struct pt_regs *regs)
+{
+    u32 insn;
+    if (get_user(insn, (u32 __user *)regs->epc)) {
+        pr_warn("Failed to read instruction from EPC: 0x%lx\n", regs->epc);
+		return false;
+    } else {
+        pr_info("Fetched instruction: 0x%08x\n", insn);
+    }
+
+    u32 opcode  = insn & 0x7f;
+    u32 rd      = (insn >> 7) & 0x1f;
+    u32 funct3  = (insn >> 12) & 0x7;
+    u32 rs1     = (insn >> 15) & 0x1f;
+    u32 csr     = (insn >> 20) & 0xfff;
+
+    pr_info("Instruction: 0x%08x\n", insn);
+    pr_info("Opcode: 0x%02x, rd:0x%01x, funct3: 0x%01x, rs1: 0x%01x, csr: 0x%03x\n", opcode, rd, funct3, rs1, csr);
+
+	if (opcode == 0x73 && funct3 == 0x2 && rs1 == 0) {
+		unsigned long val = 0;
+
+		switch (csr) {
+			case CSR_CYCLE:
+				val = 1234567890;
+				break;
+			case CSR_TIME:
+				val = 987654321;
+				break;
+			case CSR_INSTRET:
+				val = 0xDEADBEEF;
+				break;
+			default:
+				return false;
+		}
+
+		if (rd != 0) {
+			switch (rd) {
+				case 1: regs->ra = val; break;
+				case 2: regs->sp = val; break;
+				case 3: regs->gp = val; break;
+				case 4: regs->tp = val; break;
+				case 5: regs->t0 = val; break;
+				case 6: regs->t1 = val; break;
+				case 7: regs->t2 = val; break;
+				case 8: regs->s0 = val; break;
+				case 9: regs->s1 = val; break;
+				case 10: regs->a0 = val; break;
+				case 11: regs->a1 = val; break;
+				case 12: regs->a2 = val; break;
+				case 13: regs->a3 = val; break;
+				case 14: regs->a4 = val; break;
+				case 15: regs->a5 = val; break;
+				case 16: regs->a6 = val; break;
+				case 17: regs->a7 = val; break;
+				case 18: regs->s2 = val; break;
+				case 19: regs->s3 = val; break;
+				case 20: regs->s4 = val; break;
+				case 21: regs->s5 = val; break;
+				case 22: regs->s6 = val; break;
+				case 23: regs->s7 = val; break;
+				case 24: regs->s8 = val; break;
+				case 25: regs->s9 = val; break;
+				case 26: regs->s10 = val; break;
+				case 27: regs->s11 = val; break;
+				case 28: regs->t3 = val; break;
+				case 29: regs->t4 = val; break;
+				case 30: regs->t5 = val; break;
+				case 31: regs->t6 = val; break;
+				default: break; // rd == 0 (x0), no write
+			}
+		}
+
+		// Step program counter
+		regs->epc += 4;
+
+		pr_info("Emulated CSR 0x%03x => x%d = 0x%lx at EPC=0x%lx\n", csr, rd, val, regs->epc - 4);
+
+		return true;
+	}
+
+    return false;
+}
+
 asmlinkage __visible __trap_section void do_trap_insn_illegal(struct pt_regs *regs)
 {
 	bool handled;
@@ -159,8 +244,8 @@ asmlinkage __visible __trap_section void do_trap_insn_illegal(struct pt_regs *re
 		irqentry_enter_from_user_mode(regs);
 
 		local_irq_enable();
-
-		handled = riscv_v_first_use_handler(regs);
+		
+		handled = riscv_v_first_use_handler(regs) || emulate_csr_read(regs); // emulating known CSR reads
 
 		local_irq_disable();
 
