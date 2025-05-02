@@ -32,6 +32,14 @@
 #include <asm/vector.h>
 #include <asm/irq_stack.h>
 
+
+#include <linux/random.h>
+
+unsigned long mitigation_fuzzy_timing_SIGILL_cycles = 0;
+EXPORT_SYMBOL_GPL(mitigation_fuzzy_timing_SIGILL_cycles);
+
+
+
 int show_unhandled_signals = 1;
 
 static DEFINE_SPINLOCK(die_lock);
@@ -164,9 +172,18 @@ asmlinkage __visible __trap_section void do_trap_insn_illegal(struct pt_regs *re
 
 		local_irq_disable();
 
-		if (!handled)
+		if (!handled) {
 			do_trap_error(regs, SIGILL, ILL_ILLOPC, regs->epc,
 				      "Oops - illegal instruction");
+			
+			// RISC-V mitigation: fuzzy timing on SIGILL
+			if (mitigation_fuzzy_timing_SIGILL_cycles) {
+				u32 delay = get_random_u32_below((u32)mitigation_fuzzy_timing_SIGILL_cycles);
+				while (delay--)
+					asm volatile ("nop");
+			}
+
+		}
 
 		irqentry_exit_to_user_mode(regs);
 	} else {

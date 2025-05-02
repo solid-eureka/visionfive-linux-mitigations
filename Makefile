@@ -2,7 +2,7 @@
 VERSION = 6
 PATCHLEVEL = 6
 SUBLEVEL = 20
-EXTRAVERSION = -mitgtn-ctx-sw-clr-icache
+EXTRAVERSION = -mitgtn-clr-icache-fuzzy-sigill
 NAME = Research kernel with RISC-V mitigations
 
 # *DOCUMENTATION*
