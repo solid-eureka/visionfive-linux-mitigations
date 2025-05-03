@@ -36,6 +36,9 @@ int show_unhandled_signals = 1;
 
 static DEFINE_SPINLOCK(die_lock);
 
+unsigned long enable_mitigation_emulate_csr = 0;
+EXPORT_SYMBOL_GPL(enable_mitigation_emulate_csr);
+
 static void dump_kernel_instr(const char *loglvl, struct pt_regs *regs)
 {
 	char str[sizeof("0000 ") * 12 + 2 + 1], *p = str;
@@ -244,8 +247,12 @@ asmlinkage __visible __trap_section void do_trap_insn_illegal(struct pt_regs *re
 		irqentry_enter_from_user_mode(regs);
 
 		local_irq_enable();
-		
-		handled = riscv_v_first_use_handler(regs) || emulate_csr_read(regs); // emulating known CSR reads
+
+		handled = riscv_v_first_use_handler(regs);
+
+		if (!handled && enable_mitigation_emulate_csr) { // emulating known CSR reads
+			handled  = emulate_csr_read(regs);
+		}
 
 		local_irq_disable();
 
