@@ -157,6 +157,7 @@ DO_ERROR_INFO(do_trap_insn_fault,
 // Helper to emulate CSR reads like rdcycle, rdtime, rdinstret
 static bool emulate_csr_read(struct pt_regs *regs)
 {
+	// Read user instruction
     u32 insn;
     if (get_user(insn, (u32 __user *)regs->epc)) {
         pr_warn("Failed to read instruction from EPC: 0x%lx\n", regs->epc);
@@ -177,20 +178,22 @@ static bool emulate_csr_read(struct pt_regs *regs)
 	if (opcode == 0x73 && funct3 == 0x2 && rs1 == 0) {
 		unsigned long val = 0;
 
+		// Get specific CSR instruction
 		switch (csr) {
 			case CSR_CYCLE:
-				val = 1234567890;
+				val = 1234567890; // Set emulated value
 				break;
 			case CSR_TIME:
-				val = 987654321;
+				val = 987654321; // Set emulated value
 				break;
 			case CSR_INSTRET:
-				val = 0xDEADBEEF;
+				val = 0xDEADBEEF; // Set emulated value
 				break;
 			default:
 				return false;
 		}
 
+		// Get target register and write value
 		if (rd != 0) {
 			switch (rd) {
 				case 1: regs->ra = val; break;
