@@ -38,8 +38,8 @@
 unsigned long mitigation_fuzzy_timing_SIGILL_cycles = 0;
 EXPORT_SYMBOL_GPL(mitigation_fuzzy_timing_SIGILL_cycles);
 
-unsigned long enable_mitigation_emulate_csr = 0;
-EXPORT_SYMBOL_GPL(enable_mitigation_emulate_csr);
+unsigned long mitigation_emulate_csr_enable = 0;
+EXPORT_SYMBOL_GPL(mitigation_emulate_csr_enable);
 
 
 
@@ -259,7 +259,8 @@ asmlinkage __visible __trap_section void do_trap_insn_illegal(struct pt_regs *re
 
 		handled = riscv_v_first_use_handler(regs);
 
-		if (!handled && enable_mitigation_emulate_csr) { // emulating known CSR reads
+		// RISC-V mitigation: emulate known CSR reads (when direct access is disabled)
+		if (!handled && mitigation_emulate_csr_enable) {
 			handled = emulate_csr_read(regs);
 		}
 
