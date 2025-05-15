@@ -2,8 +2,8 @@
 VERSION = 6
 PATCHLEVEL = 6
 SUBLEVEL = 20
-EXTRAVERSION = -mitgtn-clr-icache-fuzzy-sigill
-NAME = Research kernel with RISC-V mitigations
+EXTRAVERSION = -mitigations-combined
+NAME = Research kernel with RISC-V side channel mitigations
 
 # *DOCUMENTATION*
 # To see a list of typical targets execute "make help"
