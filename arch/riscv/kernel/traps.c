@@ -178,8 +178,8 @@ static bool emulate_csr_read(struct pt_regs *regs)
     u32 rs1     = (insn >> 15) & 0x1f;
     u32 csr     = (insn >> 20) & 0xfff;
 
-    pr_info("Fetched instruction: 0x%08x\n", insn);
-    pr_info("Opcode: 0x%02x, rd:0x%01x, funct3: 0x%01x, rs1: 0x%01x, csr: 0x%03x\n", opcode, rd, funct3, rs1, csr);
+    // pr_info("Fetched instruction: 0x%08x\n", insn);
+    // pr_info("Opcode: 0x%02x, rd:0x%01x, funct3: 0x%01x, rs1: 0x%01x, csr: 0x%03x\n", opcode, rd, funct3, rs1, csr);
 
 	if (opcode == 0x73 && funct3 == 0x2 && rs1 == 0) {
 		unsigned long val = 0;
@@ -240,7 +240,7 @@ static bool emulate_csr_read(struct pt_regs *regs)
 		// Step program counter
 		regs->epc += 4;
 
-		pr_info("Emulated CSR 0x%03x => x%d = 0x%lx at EPC=0x%lx\n", csr, rd, val, regs->epc - 4);
+		// pr_info("Emulated CSR 0x%03x => x%d = 0x%lx at EPC=0x%lx\n", csr, rd, val, regs->epc - 4);
 
 		return true;
 	}
